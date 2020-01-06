@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
     public float jumpFoerce;
     private Vector3 moveDirrection;
-
+    public CharacterController charController;
     // Player controller starter
     void Start()
     {
@@ -19,12 +19,13 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         moveDirrection = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
-
-        if(Input.GetButton("Jump")) // Condition for for Jump
+        moveDirrection = moveDirrection * moveSpeed;
+        if (Input.GetButton("Jump")) // Condition for for Jump
         {
             moveDirrection.y = jumpFoerce;
         }
-
-        transform.position = transform.position + (moveDirrection * Time.deltaTime * moveSpeed);
+        moveDirrection.y += Physics.gravity.y * Time.deltaTime;
+        //  transform.position = transform.position + (moveDirrection * Time.deltaTime * moveSpeed);
+        charController.Move(moveDirrection * Time.deltaTime );
     }
 }
