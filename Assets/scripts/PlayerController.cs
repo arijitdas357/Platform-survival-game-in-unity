@@ -4,28 +4,49 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public float moveSpeed;
-    public float jumpFoerce;
-    private Vector3 moveDirrection;
-    public CharacterController charController;
-    // Player controller starter
-    void Start()
+    public float speed = 5f; // Movement speed
+    public float jumpHeight = 2f; // Jump height
+    public float gravity = -9.81f; // Gravity force
+    public Transform groundCheck; // Transform to check if the player is on the ground
+    public float groundDistance = 0.6f; // Distance to check for ground
+    public LayerMask groundMask; // Layer mask to define what is ground
+    private CharacterController characterController;
+    private Vector3 velocity;
+    private bool isGrounded;
+
+    private void Start()
     {
-        
+        characterController = GetComponent<CharacterController>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        moveDirrection = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
-        moveDirrection = moveDirrection * moveSpeed;
-        if (Input.GetButton("Jump")) // Condition for for Jump
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        Debug.Log(isGrounded);
+        if (isGrounded && velocity.y < 0)
         {
-            moveDirrection.y = jumpFoerce;
+            velocity.y = -2f; // Small negative value to keep the player grounded
         }
-        moveDirrection.y += Physics.gravity.y * Time.deltaTime;
-        //  transform.position = transform.position + (moveDirrection * Time.deltaTime * moveSpeed);
-        charController.Move(moveDirrection * Time.deltaTime );
+
+        // Get input for movement
+        float moveX = Input.GetAxis("Horizontal");
+        float moveZ = Input.GetAxis("Vertical");
+
+        // Calculate movement direction
+        Vector3 move = transform.right * moveX + transform.forward * moveZ;
+
+        // Apply movement
+        characterController.Move(move * speed * Time.deltaTime);
+        // Jumping
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * 2f * gravity);
+        }
+
+        // Apply gravity
+        velocity.y -= gravity * Time.deltaTime;
+
+        // Apply velocity
+        characterController.Move(velocity * Time.deltaTime);
     }
 }
